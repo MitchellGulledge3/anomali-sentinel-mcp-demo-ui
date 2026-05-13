@@ -1,12 +1,13 @@
 // Anomali_IOC_Match_In_Workspace.kql
 // ★ Flagship tool: pivot Anomali ThreatStream indicators against live workspace
 // telemetry to answer "are we seeing any Anomali-tracked threats right now?"
-// Joins ipv4-addr and domain-name indicators against CommonSecurityLog,
-// DnsEvents, and SigninLogs over the last 24h.
+// Joins ipv4-addr / domain-name / url indicators against CommonSecurityLog
+// and DnsEvents over the last 24h. Uses isfuzzy=true so the query still
+// returns cleanly even when those telemetry tables aren't present yet.
 let anomali = ThreatIntelIndicators
 | where TimeGenerated >= ago(7d)
 | where SourceSystem == "Anomali ThreatStream"
-| where IsActive == true and Revoked == false
+| where IsActive == true and Revoked != true
 | extend Pattern = tostring(Pattern)
 | extend IndicatorType = case(
     Pattern has "ipv4-addr:value",   "ipv4-addr",
@@ -16,27 +17,28 @@ let anomali = ThreatIntelIndicators
 | where IndicatorType in ("ipv4-addr","domain-name","url")
 | project IocId=Id, Ioc=ObservableValue, IndicatorType, Confidence,
           IocLabels=tostring(Data.labels), IocName=tostring(Data.name);
-let net_hits = CommonSecurityLog
-| where TimeGenerated >= ago(24h)
-| where isnotempty(DestinationIP) or isnotempty(RequestURL) or isnotempty(DestinationHostName)
-| extend Observable = coalesce(DestinationIP, DestinationHostName, RequestURL)
+let telemetry = union isfuzzy=true
+    (CommonSecurityLog
+     | where TimeGenerated >= ago(24h)
+     | extend Observable = coalesce(DestinationIP, DestinationHostName, RequestURL)
+     | where isnotempty(Observable)
+     | project TimeGenerated, Observable,
+               SrcAddr=tostring(SourceIP), Device=tostring(DeviceName),
+               Source="CommonSecurityLog"),
+    (DnsEvents
+     | where TimeGenerated >= ago(24h)
+     | where isnotempty(Name)
+     | project TimeGenerated, Observable=Name,
+               SrcAddr=tostring(ClientIP), Device=tostring(Computer),
+               Source="DnsEvents");
+telemetry
 | join kind=inner (anomali) on $left.Observable == $right.Ioc
-| summarize HitCount=count(),
-            FirstSeen=min(TimeGenerated),
-            LastSeen=max(TimeGenerated),
-            SampleSources=make_set(SourceIP, 5),
-            SampleDevices=make_set(DeviceName, 5)
-            by Ioc, IndicatorType, Confidence, IocName, IocLabels, Source="CommonSecurityLog";
-let dns_hits = DnsEvents
-| where TimeGenerated >= ago(24h)
-| where isnotempty(Name)
-| join kind=inner (anomali | where IndicatorType == "domain-name") on $left.Name == $right.Ioc
-| summarize HitCount=count(),
-            FirstSeen=min(TimeGenerated),
-            LastSeen=max(TimeGenerated),
-            SampleSources=make_set(ClientIP, 5),
-            SampleDevices=make_set(Computer, 5)
-            by Ioc, IndicatorType, Confidence, IocName, IocLabels, Source="DnsEvents";
-union net_hits, dns_hits
-| order by HitCount desc, Confidence desc
+| summarize HitCount   = count(),
+            FirstSeen  = min(TimeGenerated),
+            LastSeen   = max(TimeGenerated),
+            SampleSrc  = make_set(SrcAddr, 5),
+            SampleDev  = make_set(Device, 5),
+            MaxConfidence = max(Confidence)
+            by Ioc, IndicatorType, IocName, IocLabels, Source
+| order by HitCount desc, MaxConfidence desc
 | take 100

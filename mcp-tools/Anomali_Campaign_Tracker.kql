@@ -11,8 +11,8 @@ let actors = ThreatIntelObjects
           ActorAliases=tostring(Data.aliases),
           ActorDescription=tostring(Data.description),
           ActorLabels=tostring(Data.labels),
-          ActorCreated=Created,
-          ActorModified=Modified;
+          ActorCreated=todatetime(Data.created),
+          ActorModified=todatetime(Data.modified);
 let rels = ThreatIntelObjects
 | where TimeGenerated >= ago(30d)
 | where SourceSystem == "Anomali ThreatStream"

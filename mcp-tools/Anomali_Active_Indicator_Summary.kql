@@ -5,7 +5,7 @@
 ThreatIntelIndicators
 | where TimeGenerated >= ago(7d)
 | where SourceSystem == "Anomali ThreatStream"
-| where IsActive == true and Revoked == false
+| where IsActive == true and Revoked != true
 | extend Pattern = tostring(Pattern)
 | extend IndicatorType = case(
     Pattern has "ipv4-addr:value",           "ipv4-addr",
