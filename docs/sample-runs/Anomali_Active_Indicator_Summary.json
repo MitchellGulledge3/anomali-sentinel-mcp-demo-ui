@@ -1,0 +1,18 @@
+[
+  {
+    "ByType": "{\"domain-name\":1,\"file:sha256\":1,\"ipv4-addr\":1,\"email-addr\":1,\"url\":1}",
+    "FirstCreated": "2026-05-13T19:41:12Z",
+    "HighConfidence": "107",
+    "LastModified": "2026-05-13T19:41:12Z",
+    "LowConfidence": "29",
+    "MediumConfidence": "69",
+    "TableName": "PrimaryResult",
+    "TlpAmber": "0",
+    "TlpGreen": "0",
+    "TlpRed": "0",
+    "TlpWhite": "0",
+    "TotalIndicators": "205",
+    "UniqueObservables": "83",
+    "Unscored": "0"
+  }
+]

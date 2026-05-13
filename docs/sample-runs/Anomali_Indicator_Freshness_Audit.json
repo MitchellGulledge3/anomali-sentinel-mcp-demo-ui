@@ -1,0 +1,17 @@
+[
+  {
+    "Active": "205",
+    "AlreadyExpired": "0",
+    "ByUpdateMethod": "{\"ThreatIntelligenceUploadIndicatorsAPI\":1}",
+    "Deleted": "0",
+    "ExpiringSoon": "3",
+    "NewestModified": "2026-05-13T19:41:12Z",
+    "OldestModified": "2026-05-13T19:41:12Z",
+    "Revoked": "0",
+    "StaleOver14d": "0",
+    "TableName": "PrimaryResult",
+    "Total": "205",
+    "UpdatedLast24h": "205",
+    "UpdatedLast7d": "205"
+  }
+]

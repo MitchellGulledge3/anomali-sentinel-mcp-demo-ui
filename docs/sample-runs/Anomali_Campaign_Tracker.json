@@ -1,0 +1,38 @@
+[
+  {
+    "ActorAliases": "",
+    "ActorCreated": "2026-05-13T19:41:21Z",
+    "ActorId": "QW5vbWFsaSBUaHJlYXRTdHJlYW0=---threat-actor--6386451c-0450-4415-ac75-761af887f2a2",
+    "ActorLabels": "[\"nation-state\",\"anomalithreatstream\"]",
+    "ActorModified": "2026-05-13T19:41:21Z",
+    "ActorName": "APT29",
+    "ActorType": "threat-actor",
+    "IndicatorRefs": "[\"\"]",
+    "RelationshipTypes": "[\"\"]",
+    "TableName": "PrimaryResult"
+  },
+  {
+    "ActorAliases": "",
+    "ActorCreated": "2026-05-13T19:41:21Z",
+    "ActorId": "QW5vbWFsaSBUaHJlYXRTdHJlYW0=---threat-actor--10bc4a15-d0fd-4a4d-b697-0a50a7b68089",
+    "ActorLabels": "[\"criminal\",\"anomalithreatstream\"]",
+    "ActorModified": "2026-05-13T19:41:21Z",
+    "ActorName": "FIN7",
+    "ActorType": "threat-actor",
+    "IndicatorRefs": "[\"\"]",
+    "RelationshipTypes": "[\"\"]",
+    "TableName": "PrimaryResult"
+  },
+  {
+    "ActorAliases": "",
+    "ActorCreated": "2026-05-13T19:41:21Z",
+    "ActorId": "QW5vbWFsaSBUaHJlYXRTdHJlYW0=---threat-actor--348ef722-8d1c-470d-9a0d-578020ea2827",
+    "ActorLabels": "[\"criminal\",\"anomalithreatstream\"]",
+    "ActorModified": "2026-05-13T19:41:21Z",
+    "ActorName": "Lazarus Group",
+    "ActorType": "threat-actor",
+    "IndicatorRefs": "[\"\"]",
+    "RelationshipTypes": "[\"\"]",
+    "TableName": "PrimaryResult"
+  }
+]

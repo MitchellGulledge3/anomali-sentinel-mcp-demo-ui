@@ -290,4 +290,5 @@ The terminal demo has a simple prompt router:
 | `docs/working-session-guide.md` | Methodical live-call walkthrough for Microsoft + Anomali |
 | `docs/demo-script.md` | Step-by-step presenter script |
 | `docs/tool-use-cases.md` | Detailed use-case, value-add, and story guide for every MCP tool |
+| `docs/sample-tool-runs.md` | Live JSON output from every tool against a real Sentinel workspace (May 2026) |
 | `docs/upload-api-reference.md` | Quick reference for the TI Upload Indicators API payload, limits, and auth |

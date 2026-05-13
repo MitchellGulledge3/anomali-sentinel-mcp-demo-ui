@@ -1,0 +1,52 @@
+[
+  {
+    "AvgConfidence": "74.29333333333334",
+    "HighConfidenceCount": "40",
+    "IndicatorCount": "75",
+    "IndicatorType": "ipv4-addr",
+    "MaxConfidence": "100",
+    "SampleObservables": "[\"198.51.100.18\",\"198.51.100.9\",\"203.0.113.21\",\"203.0.113.3\",\"203.0.113.5\"]",
+    "TableName": "PrimaryResult",
+    "UniqueObservables": "37"
+  },
+  {
+    "AvgConfidence": "69.28571428571429",
+    "HighConfidenceCount": "31",
+    "IndicatorCount": "70",
+    "IndicatorType": "domain-name",
+    "MaxConfidence": "100",
+    "SampleObservables": "[\"phish-login.example.com\",\"rare-beacon.bad-example.test\",\"sliver-cnc.bad-example.test\",\"emotet-delivery.bad-example.test\",\"fastflux-c2.example.test\"]",
+    "TableName": "PrimaryResult",
+    "UniqueObservables": "11"
+  },
+  {
+    "AvgConfidence": "76.6896551724138",
+    "HighConfidenceCount": "18",
+    "IndicatorCount": "29",
+    "IndicatorType": "url",
+    "MaxConfidence": "100",
+    "SampleObservables": "[\"https://loader-stage1.bad-example.test/payload\",\"https://emotet-delivery.bad-example.test/payload\",\"https://phish-login.example.com/payload\",\"https://fastflux-c2.example.test/payload\",\"https://exfil-storage.bad-example.test/payload\"]",
+    "TableName": "PrimaryResult",
+    "UniqueObservables": "11"
+  },
+  {
+    "AvgConfidence": "79.72727272727273",
+    "HighConfidenceCount": "16",
+    "IndicatorCount": "22",
+    "IndicatorType": "file:sha256",
+    "MaxConfidence": "96",
+    "SampleObservables": "[\"fb811225a2e1445a98048678860b65f44634cec671484e82a2b5ff1bb5ff1657\",\"b25e9129f5634fbd8294c73dfee0c7db10cbb549efdf4d3799f0e3dc6ecfd43c\",\"f802e1485f9b4b26ac4a91345bec65840f20863b4ea04b8f88e9c8e179605fc7\",\"8ed89cc8444d4c859cbce7c9efe3e2e863ea7fa6963b4f8188c70b2486a5c25d\",\"29fbd2fb977a432f932f8a737d8b730ed51b31f57a964f7e97ab2bd018c44145\"]",
+    "TableName": "PrimaryResult",
+    "UniqueObservables": "22"
+  },
+  {
+    "AvgConfidence": "62",
+    "HighConfidenceCount": "2",
+    "IndicatorCount": "9",
+    "IndicatorType": "email-addr",
+    "MaxConfidence": "82",
+    "SampleObservables": "[\"billing@phish-login.example.com\",\"support@ransom-payment.example.test\"]",
+    "TableName": "PrimaryResult",
+    "UniqueObservables": "2"
+  }
+]
