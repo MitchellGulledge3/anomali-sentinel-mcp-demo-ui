@@ -1,0 +1,42 @@
+// Anomali_IOC_Match_In_Workspace.kql
+// ★ Flagship tool: pivot Anomali ThreatStream indicators against live workspace
+// telemetry to answer "are we seeing any Anomali-tracked threats right now?"
+// Joins ipv4-addr and domain-name indicators against CommonSecurityLog,
+// DnsEvents, and SigninLogs over the last 24h.
+let anomali = ThreatIntelIndicators
+| where TimeGenerated >= ago(7d)
+| where SourceSystem == "Anomali ThreatStream"
+| where IsActive == true and Revoked == false
+| extend Pattern = tostring(Pattern)
+| extend IndicatorType = case(
+    Pattern has "ipv4-addr:value",   "ipv4-addr",
+    Pattern has "domain-name:value", "domain-name",
+    Pattern has "url:value",         "url",
+    "other")
+| where IndicatorType in ("ipv4-addr","domain-name","url")
+| project IocId=Id, Ioc=ObservableValue, IndicatorType, Confidence,
+          IocLabels=tostring(Data.labels), IocName=tostring(Data.name);
+let net_hits = CommonSecurityLog
+| where TimeGenerated >= ago(24h)
+| where isnotempty(DestinationIP) or isnotempty(RequestURL) or isnotempty(DestinationHostName)
+| extend Observable = coalesce(DestinationIP, DestinationHostName, RequestURL)
+| join kind=inner (anomali) on $left.Observable == $right.Ioc
+| summarize HitCount=count(),
+            FirstSeen=min(TimeGenerated),
+            LastSeen=max(TimeGenerated),
+            SampleSources=make_set(SourceIP, 5),
+            SampleDevices=make_set(DeviceName, 5)
+            by Ioc, IndicatorType, Confidence, IocName, IocLabels, Source="CommonSecurityLog";
+let dns_hits = DnsEvents
+| where TimeGenerated >= ago(24h)
+| where isnotempty(Name)
+| join kind=inner (anomali | where IndicatorType == "domain-name") on $left.Name == $right.Ioc
+| summarize HitCount=count(),
+            FirstSeen=min(TimeGenerated),
+            LastSeen=max(TimeGenerated),
+            SampleSources=make_set(ClientIP, 5),
+            SampleDevices=make_set(Computer, 5)
+            by Ioc, IndicatorType, Confidence, IocName, IocLabels, Source="DnsEvents";
+union net_hits, dns_hits
+| order by HitCount desc, Confidence desc
+| take 100

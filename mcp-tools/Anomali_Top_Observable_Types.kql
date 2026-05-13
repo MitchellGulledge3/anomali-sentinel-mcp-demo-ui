@@ -1,0 +1,27 @@
+// Anomali_Top_Observable_Types.kql
+// Break down active Anomali ThreatStream indicators by observable type
+// (ipv4, domain, url, file hash family, email) with sample observables and
+// average confidence per type. Useful for sizing detection coverage.
+ThreatIntelIndicators
+| where TimeGenerated >= ago(7d)
+| where SourceSystem == "Anomali ThreatStream"
+| where IsActive == true and Revoked == false
+| extend Pattern = tostring(Pattern)
+| extend IndicatorType = case(
+    Pattern has "ipv4-addr:value",        "ipv4-addr",
+    Pattern has "ipv6-addr:value",        "ipv6-addr",
+    Pattern has "domain-name:value",      "domain-name",
+    Pattern has "url:value",              "url",
+    Pattern has "file:hashes.'SHA-256'",  "file:sha256",
+    Pattern has "file:hashes.'SHA-1'",    "file:sha1",
+    Pattern has "file:hashes.'MD5'",      "file:md5",
+    Pattern has "email-addr:value",       "email-addr",
+    "other")
+| summarize IndicatorCount = count(),
+            UniqueObservables = dcount(ObservableValue),
+            AvgConfidence = avg(Confidence),
+            MaxConfidence = max(Confidence),
+            SampleObservables = make_set(ObservableValue, 5),
+            HighConfidenceCount = countif(Confidence >= 80)
+            by IndicatorType
+| order by IndicatorCount desc

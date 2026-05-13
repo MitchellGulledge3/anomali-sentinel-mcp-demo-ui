@@ -1,0 +1,26 @@
+// Anomali_High_Confidence_IOC_Hunt.kql
+// Surface the highest-trust Anomali indicators (Confidence >= 80, active,
+// not revoked) along with their observable, pattern, labels, kill-chain phase,
+// and any Anomali ThreatStream external_id for analyst pivot.
+ThreatIntelIndicators
+| where TimeGenerated >= ago(7d)
+| where SourceSystem == "Anomali ThreatStream"
+| where IsActive == true and Revoked == false
+| where Confidence >= 80
+| extend Pattern = tostring(Pattern)
+| extend IndicatorType = case(
+    Pattern has "ipv4-addr:value",       "ipv4-addr",
+    Pattern has "domain-name:value",     "domain-name",
+    Pattern has "url:value",             "url",
+    Pattern has "file:hashes.'SHA-256'", "file:sha256",
+    Pattern has "email-addr:value",     "email-addr",
+    "other")
+| extend Labels      = tostring(Data.labels)
+| extend KillChain   = tostring(Data.kill_chain_phases)
+| extend ExtRefs     = tostring(Data.external_references)
+| extend Description = tostring(Data.description)
+| extend Name        = tostring(Data.name)
+| project Id, ObservableValue, IndicatorType, Confidence, Name, Description,
+          Labels, KillChain, ExtRefs, Created, Modified, Pattern
+| order by Confidence desc, Modified desc
+| take 100

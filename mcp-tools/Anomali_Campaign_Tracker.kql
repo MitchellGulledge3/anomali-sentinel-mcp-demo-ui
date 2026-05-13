@@ -1,0 +1,30 @@
+// Anomali_Campaign_Tracker.kql
+// Surface campaign / threat-actor STIX objects published by Anomali ThreatStream
+// alongside the indicators they relate to. Uses both the indicator table and
+// the non-indicator STIX object table.
+let actors = ThreatIntelObjects
+| where TimeGenerated >= ago(30d)
+| where SourceSystem == "Anomali ThreatStream"
+| where StixType in ("threat-actor","campaign","intrusion-set","malware","attack-pattern")
+| project ActorId=Id, ActorType=StixType,
+          ActorName=tostring(Data.name),
+          ActorAliases=tostring(Data.aliases),
+          ActorDescription=tostring(Data.description),
+          ActorLabels=tostring(Data.labels),
+          ActorCreated=Created,
+          ActorModified=Modified;
+let rels = ThreatIntelObjects
+| where TimeGenerated >= ago(30d)
+| where SourceSystem == "Anomali ThreatStream"
+| where StixType == "relationship"
+| extend SourceRef = tostring(Data.source_ref)
+| extend TargetRef = tostring(Data.target_ref)
+| extend RelType   = tostring(Data.relationship_type)
+| project SourceRef, TargetRef, RelType;
+actors
+| join kind=leftouter (rels) on $left.ActorId == $right.SourceRef
+| summarize IndicatorRefs = make_set(TargetRef, 20),
+            RelationshipTypes = make_set(RelType, 10)
+            by ActorId, ActorType, ActorName, ActorAliases, ActorLabels, ActorCreated, ActorModified
+| order by ActorModified desc
+| take 50

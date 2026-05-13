@@ -1,0 +1,38 @@
+// Anomali_Active_Indicator_Summary.kql
+// Executive summary of Anomali ThreatStream indicators currently active in the
+// workspace: counts by indicator type (ipv4-addr, domain-name, url, file-hash),
+// confidence bucket, TLP marking, and freshness.
+ThreatIntelIndicators
+| where TimeGenerated >= ago(7d)
+| where SourceSystem == "Anomali ThreatStream"
+| where IsActive == true and Revoked == false
+| extend Pattern = tostring(Pattern)
+| extend IndicatorType = case(
+    Pattern has "ipv4-addr:value",           "ipv4-addr",
+    Pattern has "ipv6-addr:value",           "ipv6-addr",
+    Pattern has "domain-name:value",         "domain-name",
+    Pattern has "url:value",                 "url",
+    Pattern has "file:hashes.'SHA-256'",     "file:sha256",
+    Pattern has "file:hashes.'SHA-1'",       "file:sha1",
+    Pattern has "file:hashes.'MD5'",         "file:md5",
+    Pattern has "email-addr:value",          "email-addr",
+    "other")
+| extend ConfidenceBucket = case(
+    Confidence >= 80, "high (>=80)",
+    Confidence >= 50, "medium (50-79)",
+    Confidence >= 1,  "low (1-49)",
+    "unscored")
+| extend Tlp = tostring(AdditionalFields.TLPLevel)
+| summarize TotalIndicators   = count(),
+            UniqueObservables = dcount(ObservableValue),
+            ByType            = make_bag(bag_pack(IndicatorType, 1), 50),
+            HighConfidence    = countif(Confidence >= 80),
+            MediumConfidence  = countif(Confidence between (50 .. 79)),
+            LowConfidence     = countif(Confidence between (1 .. 49)),
+            Unscored          = countif(Confidence == 0 or isnull(Confidence)),
+            TlpWhite          = countif(Tlp == "white"),
+            TlpGreen          = countif(Tlp == "green"),
+            TlpAmber          = countif(Tlp == "amber"),
+            TlpRed            = countif(Tlp == "red"),
+            FirstCreated      = min(Created),
+            LastModified      = max(Modified)

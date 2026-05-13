@@ -1,0 +1,23 @@
+// Anomali_Indicator_Freshness_Audit.kql
+// Audit indicator hygiene: how fresh is the Anomali feed, what fraction of
+// indicators are stale or expiring, and which LastUpdateMethod populated them.
+// Helps detect TIP ingestion gaps and stale IOCs that should be retired.
+ThreatIntelIndicators
+| where TimeGenerated >= ago(14d)
+| where SourceSystem == "Anomali ThreatStream"
+| extend ValidUntil = todatetime(Data.valid_until)
+| extend ValidFrom  = todatetime(Data.valid_from)
+| extend AgeDays      = datetime_diff('day', now(), Modified)
+| extend ExpiresInDays = iif(isnotnull(ValidUntil), datetime_diff('day', ValidUntil, now()), int(null))
+| summarize Total          = count(),
+            Active         = countif(IsActive == true),
+            Revoked        = countif(Revoked == true),
+            Deleted        = countif(IsDeleted == true),
+            UpdatedLast24h = countif(Modified >= ago(24h)),
+            UpdatedLast7d  = countif(Modified >= ago(7d)),
+            StaleOver14d   = countif(Modified < ago(14d)),
+            ExpiringSoon   = countif(ExpiresInDays between (0 .. 7)),
+            AlreadyExpired = countif(ExpiresInDays < 0),
+            ByUpdateMethod = make_bag(bag_pack(tostring(LastUpdateMethod), 1), 20),
+            OldestModified = min(Modified),
+            NewestModified = max(Modified)
